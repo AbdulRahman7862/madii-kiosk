@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Madison Square Mall - Reception Kiosk</title>
+<style>
+:root{--bg1:#062f2c;--bg2:#0b4f49;--accent:#f5c451;--ink:#eafaf7;--card:rgba(255,255,255,.09)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--ink);font-family:system-ui,"Noto Nastaliq Urdu","Segoe UI",sans-serif;overflow:hidden}
+#app{height:100%;display:grid;grid-template-rows:auto 1fr auto;padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom)}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 4px}
+header h1{font-size:20px;margin:0;letter-spacing:.5px}
+header small{opacity:.7}
+.langs button{background:var(--card);border:1px solid rgba(255,255,255,.25);color:var(--ink);padding:8px 16px;border-radius:20px;font-size:16px;margin-left:6px}
+.langs button.on{background:var(--accent);color:#3a2a00;border-color:var(--accent);font-weight:700}
+main{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:10px}
+#stage{position:relative;width:min(46vh,78vw);aspect-ratio:4/5}
+#ring{position:absolute;inset:-6px;border-radius:50%;border:4px solid transparent;opacity:0;transition:.3s}
+.listening #ring{opacity:1;border-color:var(--accent);animation:pulse 1.2s infinite}
+.thinking #ring{opacity:1;border-color:#7dd3fc;border-top-color:transparent;animation:spin 1s linear infinite}
+@keyframes pulse{50%{transform:scale(1.04);opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+svg#avatar{width:100%;height:100%;animation:bob 5s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.blink{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+#hand{display:none;transform-origin:322px 430px}
+.wave #hand{display:block;animation:wave .7s ease-in-out infinite alternate}
+@keyframes wave{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
+#caption{width:min(900px,94vw);min-height:92px;background:var(--card);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:14px 20px;font-size:clamp(18px,2.6vw,26px);line-height:1.45;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
+#caption .you{font-size:15px;opacity:.65}
+[dir=rtl]{font-family:"Noto Nastaliq Urdu",system-ui,sans-serif;line-height:2}
+#chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:min(980px,96vw);padding:8px 0}
+.chip{background:var(--card);border:1px solid rgba(255,255,255,.25);color:var(--ink);padding:14px 20px;border-radius:16px;font-size:clamp(15px,2vw,20px)}
+.chip:active{background:var(--accent);color:#3a2a00}
+footer{display:flex;gap:10px;align-items:center;justify-content:center;padding:10px 0 16px}
+#mic{width:74px;height:74px;border-radius:50%;border:none;background:var(--accent);color:#3a2a00;font-size:32px}
+#txt{flex:1;max-width:520px;padding:16px 18px;border-radius:30px;border:1px solid rgba(255,255,255,.25);background:var(--card);color:var(--ink);font-size:18px;user-select:text}
+#done{background:transparent;border:2px solid rgba(255,255,255,.4);color:var(--ink);padding:14px 20px;border-radius:30px;font-size:17px}
+#listenPill{display:none;align-items:center;gap:10px;background:var(--accent);color:#3a2a00;font-weight:700;border-radius:30px;padding:10px 22px;font-size:clamp(16px,2.2vw,22px)}
+body.listening #listenPill{display:flex}
+#listenPill i{width:10px;height:10px;border-radius:50%;background:#b3364a;animation:fade 1s infinite}
+#idleHint{font-size:clamp(20px,3vw,32px);opacity:.9;text-align:center;animation:fade 2.4s ease-in-out infinite}
+@keyframes fade{50%{opacity:.4}}
+body:not(.idle) #idleHint{display:none}
+body.idle #chips,body.idle footer,body.idle #caption{display:none}
+.overlay{position:fixed;inset:0;background:rgba(3,25,23,.94);display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:24px;text-align:center;z-index:10}
+.overlay.show{display:flex}
+.overlay h2{margin:0;font-size:clamp(24px,4vw,40px)}
+.stars{display:flex;gap:10px}
+.stars button{background:none;border:none;font-size:clamp(44px,9vw,72px);color:#5c7a76;padding:0 4px}
+.stars button.on{color:var(--accent)}
+.tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:760px}
+.tag{background:var(--card);border:1px solid rgba(255,255,255,.3);color:var(--ink);padding:10px 16px;border-radius:20px;font-size:17px}
+.tag.on{background:var(--accent);color:#3a2a00}
+#comment{width:min(640px,90vw);height:80px;border-radius:16px;padding:12px;font-size:17px;background:var(--card);color:var(--ink);border:1px solid rgba(255,255,255,.25);user-select:text}
+.row{display:flex;gap:12px}
+.btn{padding:16px 34px;border-radius:30px;border:none;font-size:20px;background:var(--accent);color:#3a2a00;font-weight:700}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid rgba(255,255,255,.4);font-weight:400}
+#dir{justify-content:flex-start;overflow:auto}
+#dir h2{margin-top:10px}
+.floors{width:min(980px,96vw);display:flex;flex-direction:column;gap:10px;text-align:left}
+.floor{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start;background:var(--card);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:12px 14px}
+.floor b{font-size:clamp(16px,2.2vw,22px);color:var(--accent)}
+.floor b small{display:block;color:var(--ink);opacity:.65;font-weight:400;font-size:13px}
+.brands{display:flex;flex-wrap:wrap;gap:8px}
+.brand{background:transparent;border:1px solid rgba(255,255,255,.3);color:var(--ink);padding:8px 14px;border-radius:14px;font-size:clamp(14px,1.8vw,18px)}
+.brand:active{background:var(--accent);color:#3a2a00}
+#start button{font-size:26px;padding:22px 48px}
+</style>
+</head>
+<body class="idle">
+<div id="app">
+<header>
+<div><h1>MADISON SQUARE MALL</h1><small id="sub">Guest Assistance</small></div>
+<div class="langs"><button id="l-en" class="on">English</button><button id="l-ur">اردو</button></div>
+</header>
+<main id="main">
+<div id="idleHint">👋 Hi, I'm Madii. Step closer and just talk to me<br><small>میں مدی ہوں۔ قریب آئیں اور مجھ سے بات کریں</small></div>
+<div id="stage">
+<div id="ring"></div>
+<svg id="avatar" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" aria-label="Madii, virtual receptionist">
+<defs>
+<radialGradient id="glow" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#2dd4bf" stop-opacity=".35"/><stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="200" cy="230" r="200" fill="url(#glow)"/>
+<path d="M105 210 C90 90 310 90 295 210 C300 300 320 340 290 380 L110 380 C80 340 100 300 105 210Z" fill="#24140d"/>
+<path d="M50 500 C50 410 120 365 200 365 C280 365 350 410 350 500Z" fill="#0f766e"/>
+<path d="M165 368 L200 430 L235 368 Z" fill="#f8fafc"/>
+<path d="M150 372 L200 452 L118 398Z M250 372 L200 452 L282 398Z" fill="#0b5f58"/>
+<rect x="262" y="425" width="62" height="26" rx="5" fill="#f8fafc"/>
+<text x="293" y="443" font-size="13" font-weight="700" text-anchor="middle" fill="#0f766e" font-family="system-ui">Madii</text>
+<rect x="178" y="310" width="44" height="66" rx="16" fill="#e2a679"/>
+<g id="hand"><line x1="322" y1="430" x2="338" y2="320" stroke="#e2a679" stroke-width="24" stroke-linecap="round"/><circle cx="340" cy="304" r="22" fill="#e2a679"/></g>
+<ellipse cx="200" cy="210" rx="82" ry="98" fill="#f0b98d"/>
+<ellipse cx="118" cy="220" rx="9" ry="16" fill="#e8ad80"/><ellipse cx="282" cy="220" rx="9" ry="16" fill="#e8ad80"/>
+<path d="M114 200 C112 100 288 100 286 200 C262 150 170 132 114 200Z" fill="#24140d"/>
+<path d="M143 182 Q165 172 187 182" stroke="#24140d" stroke-width="5" fill="none" stroke-linecap="round"/>
+<path d="M213 182 Q235 172 257 182" stroke="#24140d" stroke-width="5" fill="none" stroke-linecap="round"/>
+<g class="blink"><ellipse cx="165" cy="212" rx="15" ry="10" fill="#fff"/><circle id="pupilL" cx="165" cy="212" r="7" fill="#3b2314"/></g>
+<g class="blink"><ellipse cx="235" cy="212" rx="15" ry="10" fill="#fff"/><circle id="pupilR" cx="235" cy="212" r="7" fill="#3b2314"/></g>
+<path d="M200 222 Q194 246 204 248" stroke="#d99a70" stroke-width="3" fill="none" stroke-linecap="round"/>
+<circle cx="150" cy="248" r="14" fill="#ff8a8a" opacity=".22"/><circle cx="250" cy="248" r="14" fill="#ff8a8a" opacity=".22"/>
+<path id="smile" d="M172 268 Q200 292 228 268" stroke="#b3364a" stroke-width="6" fill="none" stroke-linecap="round"/>
+<ellipse id="mouth" cx="200" cy="273" rx="20" ry="4" fill="#7a1f2b" opacity="0"/>
+<circle cx="118" cy="240" r="4" fill="#f5c451"/><circle cx="282" cy="240" r="4" fill="#f5c451"/>
+</svg>
+</div>
+<div id="listenPill"><i></i><span id="listenTxt">Listening, speak now</span></div>
+<div id="caption"><div id="reply"></div><div class="you" id="you"></div></div>
+<div id="chips"></div>
+</main>
+<footer>
+<button id="done">✔ I'm done</button>
+<input id="txt" type="text" placeholder="Type your question…" autocomplete="off">
+<button id="mic" aria-label="Talk">🎤</button>
+</footer>
+</div>
+<div class="overlay" id="fb">
+<h2 id="fbTitle">How was your visit today?</h2>
+<div class="stars" id="stars"></div>
+<div class="tags" id="tags"></div>
+<textarea id="comment" placeholder="Any comments? (optional)"></textarea>
+<div class="row"><button class="btn" id="fbSend">Submit</button><button class="btn ghost" id="fbSkip">Skip</button></div>
+</div>
+<div class="overlay" id="dir"><h2 id="dirTitle">Floor directory</h2><div class="floors" id="floors"></div><button class="btn ghost" id="dirClose">Close</button></div>
+<div class="overlay" id="thanks"><h2 id="thanksTxt"></h2><div style="font-size:80px">🙏</div></div>
+<div class="overlay show" id="start"><h2>Madison Square Mall Kiosk</h2><button class="btn" id="startBtn">Start Kiosk</button><small id="startNote" style="opacity:.6"></small></div>
+<video id="cam" playsinline muted style="display:none"></video>
+<script>
+const CFG = {
+WEBHOOK: 'https://ardev.app.n8n.cloud/webhook/mall-reception',
+KIOSK_ID: 'MSM-KIOSK-01',
+NEAR_FACE_RATIO: 0.18,
+MOTION_THRESHOLD: 9,
+NEAR_HITS: 4,
+GONE_RESET_MS: 15000,
+INACTIVITY_MS: 45000,
+FEEDBACK_TIMEOUT_MS: 40000,
+COOLDOWN_MS: 8000
+};
+const T = {
+en: { dir:'ltr', sub:'Guest Assistance', ph:'Type your question…', done:"✔ I'm done", fbTitle:'How was your visit today?', fbComment:'Any comments? (optional)', send:'Submit', skip:'Skip',
+tags:['Cleanliness','Staff','Shops & Brands','Food Court','Parking','Finding my way'], err:"I'm sorry, I'm having trouble connecting. Please visit our Customer Service Desk.",
+thinking:'One moment…', you:'You: ', start:'Start Kiosk', speech:'en-US', rec:'en-PK',
+chips:[['🏬 Floor directory','__DIR__'],['🛍️ Find a shop','Help me find a shop'],['🍔 Food court','Where is the food court and what are its timings?'],['🚻 Washrooms','Where are the washrooms?'],['🕒 Mall timings','What are the mall timings?'],['🅿️ Parking','Tell me about parking'],['🕌 Prayer area','Where is the prayer area?'],['🎁 Offers & events','What offers and events are on?'],['🙋 Talk to staff','I need to speak to a staff member']] },
+ur: { dir:'rtl', sub:'رہنمائی کاؤنٹر', ph:'اپنا سوال لکھیں…', done:'✔ میں فارغ ہوں', fbTitle:'آج کا دورہ کیسا رہا؟', fbComment:'کوئی رائے؟ (اختیاری)', send:'بھیجیں', skip:'چھوڑیں',
+tags:['صفائی','عملہ','دکانیں اور برانڈز','فوڈ کورٹ','پارکنگ','راستہ تلاش کرنا'], err:'معذرت، رابطہ نہیں ہو پا رہا۔ براہ کرم کسٹمر سروس ڈیسک پر جائیں۔',
+thinking:'ایک لمحہ…', you:'آپ: ', start:'شروع کریں', speech:'ur-PK', rec:'ur-PK',
+chips:[['🏬 ڈائریکٹری','__DIR__'],['🛍️ دکان تلاش کریں','مجھے ایک دکان تلاش کرنے میں مدد کریں'],['🍔 فوڈ کورٹ','فوڈ کورٹ کہاں ہے اور اس کے اوقات کیا ہیں؟'],['🚻 واش رومز','واش رومز کہاں ہیں؟'],['🕒 مال کے اوقات','مال کے اوقات کیا ہیں؟'],['🅿️ پارکنگ','پارکنگ کے بارے میں بتائیں'],['🕌 نماز کی جگہ','نماز کی جگہ کہاں ہے؟'],['🎁 آفرز اور ایونٹس','کون سی آفرز اور ایونٹس چل رہے ہیں؟'],['🙋 عملے سے بات','مجھے عملے کے کسی فرد سے بات کرنی ہے']] }
+};
+let history = [];
+let lang = 'en', state = 'idle', sessionId = null, busy = false;
+let lastInteraction = 0, lastSeen = 0, cooldownUntil = 0, nearHits = 0;
+let inactTimer = null, fbTimer = null, speakTimer = null, rating = 0, tagsSel = new Set();
+const $ = id => document.getElementById(id);
+const body = document.body;
+function setState(s){ state = s; body.classList.remove('wave','listening','thinking','speaking'); ['wave','listening','thinking','speaking'].includes(s) && body.classList.add(s); $('main').className = s;
+document.body.className = (s === 'idle' ? 'idle ' : '') + (['wave','listening','thinking'].includes(s) ? s : ''); }
+function chipAction(msg){ return msg === '__DIR__' ? openDirectory : () => ask(msg); }
+function renderLang(){
+const t = T[lang]; document.documentElement.lang = lang; $('sub').textContent = t.sub; $('txt').placeholder = t.ph; $('done').textContent = t.done;
+$('l-en').classList.toggle('on', lang==='en'); $('l-ur').classList.toggle('on', lang==='ur');
+$('reply').dir = t.dir; $('fbTitle').textContent = t.fbTitle; $('comment').placeholder = t.fbComment; $('fbSend').textContent = t.send; $('fbSkip').textContent = t.skip;
+$('chips').innerHTML = ''; t.chips.forEach(([label,msg]) => { const b = document.createElement('button'); b.className='chip'; b.textContent=label; b.onclick=chipAction(msg); $('chips').appendChild(b); });
+$('tags').innerHTML = ''; t.tags.forEach(x => { const b = document.createElement('button'); b.className='tag'; b.textContent=x; b.onclick=()=>{ tagsSel.has(x)?tagsSel.delete(x):tagsSel.add(x); b.classList.toggle('on'); }; $('tags').appendChild(b); });
+}
+function buildStars(){ $('stars').innerHTML=''; for(let i=1;i<=5;i++){ const b=document.createElement('button'); b.textContent='★'; b.onclick=()=>{ rating=i; [...$('stars').children].forEach((s,k)=>s.classList.toggle('on',k<i)); }; $('stars').appendChild(b);} }
+$('l-en').onclick = () => { lang='en'; renderLang(); touch(); };
+$('l-ur').onclick = () => { lang='ur'; renderLang(); touch(); };
+function fixName(t){ return String(t||'').replace(/\bSara\b/g,'Madii').replace(/سارہ/g,'مدی'); }
+function showReply(text, you){ text = fixName(text); $('reply').dir = T[lang].dir; $('reply').textContent = text; $('you').textContent = you ? T[lang].you + you : ''; }
+function pickVoice(code){
+const vs = speechSynthesis.getVoices(); const pre = code.slice(0,2);
+const m = vs.filter(v => v.lang.replace('_','-').toLowerCase().startsWith(pre));
+return m.find(v => /female|zira|samantha|susan|hazel|google.*(us|uk)/i.test(v.name)) || m[0] || null;
+}
+function mouthOpen(on){ $('smile').style.opacity = on ? 0 : 1; $('mouth').style.opacity = on ? 1 : 0; }
+function sayable(t){ return fixName(t).replace(/Madii/gi, lang==='ur' ? 'مدی' : 'Maddy').replace(/[*_#`]/g,''); }
+let speakGuard = null;
+function speak(text, after){
+speechSynthesis.cancel(); clearInterval(speakTimer); clearTimeout(speakGuard); mouthOpen(false);
+let done = false;
+const finish = () => { if(done) return; done = true; clearInterval(speakTimer); clearTimeout(speakGuard); mouthOpen(false); if(state==='speaking') setState('ready'); after && after(); };
+const v = pickVoice(T[lang].speech);
+if(!v || !text){ finish(); return; }
+const u = new SpeechSynthesisUtterance(sayable(text)); u.voice = v; u.lang = v.lang; u.rate = 0.98; u.pitch = 1.08;
+u.onstart = () => { setState('speaking'); mouthOpen(true); speakTimer = setInterval(() => { const m=$('mouth'); m.setAttribute('ry', 3+Math.random()*13); m.setAttribute('rx', 15+Math.random()*10); }, 110); };
+u.onend = finish; u.onerror = finish;
+speakGuard = setTimeout(finish, 4000 + String(text).length * 90);
+speechSynthesis.speak(u);
+}
+speechSynthesis.onvoiceschanged = () => {};
+const DIRECTORY = [
+['LG', 'Lower Ground', ['Khaadi']],
+['G', 'Fashion and sportswear', ['Skechers','Sana Safinaz','Adidas','Royal Tag','Monark','The Coffee Bean & Tea Leaf','Maria.B.','Orient','Lawrencepur']],
+['1', "Women's fashion and beauty", ['Chinyere','Cross Stitch','Limelight','Edenrobe','Saya','WB by Hemani','Saeed Ghani','Sohaye','Batik']],
+['2', "Women's fashion", ['Ethnc','Insignia','Tesoro','Bareeze','Mona Embroidery']],
+['3', 'Family fashion', ['Minnie Minors','J.','Sapphire','Dynasty','Taana Baana','Lady Privacy']],
+['4', 'Shoes and bags', ['Bata','Servis','Borjan','ECS','Stylo','Walkeaze','Mocciani','1st Step','Ndure']],
+['5', 'Formal and eastern wear', ['Bin Saeed','Agha Noor','Edenrobe Men','Seran','Diners','Cambridge','Mashriq','MTJ']],
+['6', 'Prayer rooms', ['Prayer rooms']],
+['7', 'Kids', ["Zubaida's",'Bachaa Party','Little People','Rollover Kids']],
+['8', 'Food court', ['Red Apple','Cheezious','Wrap Lab','O-YO']],
+['9', 'Entertainment', ['Wonder World','Wild Wings']]
+];
+function openDirectory(){
+touch(); $('dirTitle').textContent = lang==='ur' ? 'منزل وار ڈائریکٹری' : 'Floor directory'; $('dirClose').textContent = lang==='ur' ? 'بند کریں' : 'Close';
+$('floors').innerHTML = '';
+DIRECTORY.forEach(([f, label, brands]) => {
+const row = document.createElement('div'); row.className = 'floor';
+row.innerHTML = `<b>${f === 'LG' || f === 'G' ? f : 'Floor ' + f}<small>${label}</small></b>`;
+const wrap = document.createElement('div'); wrap.className = 'brands';
+brands.forEach(n => { const b = document.createElement('button'); b.className = 'brand'; b.textContent = n;
+b.onclick = () => { $('dir').classList.remove('show'); ask(lang==='ur' ? `${n} کہاں ہے؟` : `Where is ${n}?`); }; wrap.appendChild(b); });
+row.appendChild(wrap); $('floors').appendChild(row);
+});
+$('dir').classList.add('show');
+}
+$('dirClose').onclick = () => { $('dir').classList.remove('show'); touch(); };
+async function call(event, extra = {}){
+const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 30000);
+try{
+const r = await fetch(CFG.WEBHOOK, { method:'POST', headers:{'Content-Type':'application/json'}, signal: ctrl.signal,
+body: JSON.stringify({ event, sessionId, lang, kioskId: CFG.KIOSK_ID, ...extra }) });
+if(!r.ok) throw new Error(r.status);
+return await r.json();
+} finally { clearTimeout(to); }
+}
+function touch(){ lastInteraction = Date.now(); clearTimeout(inactTimer); if(['ready','speaking','listening','thinking'].includes(state)) inactTimer = setTimeout(endSession, CFG.INACTIVITY_MS); }
+async function startSession(){
+sessionId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random()); history = []; rating = 0; tagsSel.clear(); setState('wave'); renderLang(); showReply('…'); touch();
+try{ const d = await call('presence'); showReply(d.reply); speak(d.reply, afterReply); }
+catch(e){ const m=T[lang].err; showReply(m); speak(m, afterReply); }
+touch();
+}
+async function ask(message){
+message = (message||'').trim(); if(!message || busy) return; busy = true; touch();
+speechSynthesis.cancel(); stopListening(); setState('thinking'); showReply(T[lang].thinking, message); $('txt').value='';
+try{
+const d = await call('chat', { message, history: history.slice(-8) });
+history.push({ role:'visitor', text: message }, { role:'madii', text: d.reply || '' });
+showReply(d.reply, message); busy = false;
+speak(d.reply, () => { if(d.suggestFeedback || /goodbye|bye|khuda hafiz|allah hafiz|خدا حافظ/i.test(message)) { if(state!=='idle') endSession(); } else afterReply(); });
+}catch(e){ const m=T[lang].err; showReply(m, message); busy = false; speak(m, afterReply); }
+busy = false; touch();
+}
+async function endSession(){
+if(state==='idle' || state==='feedback') return; clearTimeout(inactTimer); speechSynthesis.cancel(); stopListening(); state='feedback';
+let prompt = lang==='ur' ? 'میڈیسن اسکوائر مال آنے کا شکریہ! جانے سے پہلے بتائیں کہ آج کا تجربہ کیسا رہا؟' : 'Thank you for visiting Madison Square Mall! How was your experience today?';
+try{ const d = await call('end'); prompt = d.reply || prompt; }catch(e){}
+buildStars(); $('comment').value=''; renderLang(); $('fb').classList.add('show'); speak(prompt);
+fbTimer = setTimeout(() => finishFeedback(false), CFG.FEEDBACK_TIMEOUT_MS);
+}
+async function finishFeedback(send){
+clearTimeout(fbTimer); $('fb').classList.remove('show'); speechSynthesis.cancel();
+let msg = lang==='ur' ? 'آپ کا شکریہ! آپ کا دن اچھا گزرے۔' : 'Thank you! Have a wonderful day.';
+if(send && rating>0){
+try{ const d = await call('feedback', { rating, tags:[...tagsSel], comment:$('comment').value }); msg = d.reply || msg; }catch(e){}
+}
+$('thanksTxt').textContent = msg; $('thanks').classList.add('show'); speak(msg);
+setTimeout(resetToIdle, 6000);
+}
+function resetToIdle(){
+$('thanks').classList.remove('show'); $('fb').classList.remove('show'); $('dir').classList.remove('show'); speechSynthesis.cancel(); clearTimeout(inactTimer); clearTimeout(fbTimer);
+stopListening(); misses = 0; voiceOn = !!SR; sessionId = null; busy = false; cooldownUntil = Date.now() + CFG.COOLDOWN_MS; nearHits = 0; lang = 'en'; renderLang(); setState('idle');
+}
+$('fbSend').onclick = () => rating ? finishFeedback(true) : $('stars').animate([{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'none'}],{duration:250});
+$('fbSkip').onclick = () => finishFeedback(false);
+$('done').onclick = endSession;
+$('txt').addEventListener('keydown', e => { if(e.key==='Enter') ask($('txt').value); });
+$('txt').addEventListener('input', touch);
+$('txt').addEventListener('focus', () => { if(state==='listening'){ stopListening(); setState('ready'); } });
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition; let rec = null;
+let voiceOn = !!SR, misses = 0;
+const LISTEN_TXT = { en:'Listening, speak now', ur:'سن رہی ہوں، بولیں' };
+function stopListening(){ const r = rec; rec = null; try{ r && r.abort(); }catch(e){} }
+function afterReply(){
+if(state==='idle' || state==='feedback') return;
+setState('ready'); touch();
+if(voiceOn) setTimeout(() => { if(state==='ready' && !busy) listen(); }, 400);
+}
+function listen(){
+if(!SR) return;
+speechSynthesis.cancel(); stopListening();
+const r = new SR(); rec = r;
+r.lang = T[lang].rec; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+let finalText = '';
+r.onresult = e => {
+let interim = '';
+for(let i = e.resultIndex; i < e.results.length; i++){ const x = e.results[i]; if(x.isFinal) finalText += x[0].transcript; else interim += x[0].transcript; }
+$('you').textContent = T[lang].you + (finalText + interim); touch();
+};
+r.onerror = ev => { if(ev.error==='not-allowed' || ev.error==='service-not-allowed'){ voiceOn = false; } };
+r.onend = () => {
+if(rec !== r) return;
+rec = null;
+if(state !== 'listening') return;
+const t = finalText.trim();
+if(t){ misses = 0; ask(t); return; }
+setState('ready'); misses++;
+if(voiceOn && misses < 2) setTimeout(() => { if(state==='ready' && !busy) listen(); }, 300);
+};
+$('listenTxt').textContent = LISTEN_TXT[lang];
+setState('listening'); touch();
+try{ r.start(); }catch(e){ rec = null; setState('ready'); }
+}
+$('mic').onclick = () => {
+if(!SR){ showReply(lang==='ur' ? 'اس ڈیوائس پر آواز سے سوال ممکن نہیں، براہ کرم لکھیں۔' : 'Voice input is not supported on this browser. Please type or tap a button.'); return; }
+touch();
+if(state==='listening'){ voiceOn = false; stopListening(); setState('ready'); return; }
+voiceOn = true; misses = 0;
+if(state==='idle'){ startSession(); return; }
+listen();
+};
+['l-en','l-ur'].forEach(id => $(id).addEventListener('click', () => { if(state==='listening') listen(); }));
+const cam = $('cam'); const cv = document.createElement('canvas'); cv.width = 48; cv.height = 36; const cx = cv.getContext('2d', {willReadFrequently:true});
+let faceDet = null, prev = null;
+async function initCamera(){
+try{
+const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:320, height:240 }, audio:false });
+cam.srcObject = stream; await cam.play();
+if('FaceDetector' in window){ try{ faceDet = new FaceDetector({ fastMode:true, maxDetectedFaces:1 }); }catch(e){} }
+setInterval(checkPresence, 300);
+return true;
+}catch(e){ return false; }
+}
+function motionScore(){
+cx.drawImage(cam, 0, 0, 48, 36); const d = cx.getImageData(0,0,48,36).data; const g = new Uint8Array(48*36);
+for(let i=0;i<g.length;i++) g[i] = (d[i*4]*0.3 + d[i*4+1]*0.59 + d[i*4+2]*0.11);
+let s = 0; if(prev){ for(let i=0;i<g.length;i++) s += Math.abs(g[i]-prev[i]); s /= g.length; } prev = g; return s;
+}
+async function checkPresence(){
+let near = false;
+if(faceDet){ try{ const f = await faceDet.detect(cam); near = f.length && (f[0].boundingBox.width / cam.videoWidth) >= CFG.NEAR_FACE_RATIO; }catch(e){} }
+else near = motionScore() > CFG.MOTION_THRESHOLD;
+const now = Date.now();
+if(near){ lastSeen = now; }
+if(state==='idle'){
+if(now < cooldownUntil) return;
+nearHits = near ? nearHits + 1 : 0;
+if(nearHits >= CFG.NEAR_HITS){ nearHits = 0; startSession(); }
+} else if(['ready'].includes(state) && now - lastSeen > CFG.GONE_RESET_MS && now - lastInteraction > CFG.GONE_RESET_MS){
+resetToIdle();
+}
+}
+$('idleHint').onclick = () => { if(state==='idle') startSession(); };
+$('stage').onclick = () => { if(state==='idle') startSession(); };
+$('startBtn').onclick = async () => {
+try{ await document.documentElement.requestFullscreen(); }catch(e){}
+try{ if('wakeLock' in navigator) await navigator.wakeLock.request('screen'); }catch(e){}
+speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+try{ const a = await navigator.mediaDevices.getUserMedia({ audio:true }); a.getTracks().forEach(t => t.stop()); }catch(e){ voiceOn = false; }
+const ok = await initCamera();
+$('start').classList.remove('show'); renderLang(); setState('idle');
+if(!ok) $('idleHint').innerHTML = '👆 Hi, I\'m Madii. Tap anywhere to talk to me<br><small>میں مدی ہوں۔ بات کرنے کے لیے اسکرین کو چھوئیں</small>';
+};
+document.addEventListener('visibilitychange', async () => { if(!document.hidden && 'wakeLock' in navigator){ try{ await navigator.wakeLock.request('screen'); }catch(e){} } });
+renderLang();
+</script>
+</body>
+</html>
