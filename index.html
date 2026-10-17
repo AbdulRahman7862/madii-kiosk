@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,33 +12,41 @@
   header{display:flex;justify-content:space-between;align-items:center;padding:12px 4px}
   header h1{font-size:20px;margin:0;letter-spacing:.5px}
   header small{opacity:.7}
-  .langs button{background:var(--card);border:1px solid rgba(255,255,255,.25);color:var(--ink);padding:8px 16px;border-radius:20px;font-size:16px;margin-left:6px}
+  .langs{display:flex;flex:0 0 auto}
+  .langs button{white-space:nowrap;background:var(--card);border:1px solid rgba(255,255,255,.25);color:var(--ink);padding:8px 16px;border-radius:20px;font-size:16px;margin-left:6px}
   .langs button.on{background:var(--accent);color:#3a2a00;border-color:var(--accent);font-weight:700}
-  main{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:10px}
-  #stage{position:relative;width:min(46vh,78vw);aspect-ratio:4/5}
-  #ring{position:absolute;inset:-6px;border-radius:50%;border:4px solid transparent;opacity:0;transition:.3s}
+  main{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:10px;overflow:hidden}
+  #stage{position:relative;flex:1 1 0;min-height:110px;max-height:46vh;width:100%;display:flex;justify-content:center}
+  #ring{position:absolute;top:0;bottom:0;left:50%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;border:4px solid transparent;opacity:0;transition:opacity .3s}
   .listening #ring{opacity:1;border-color:var(--accent);animation:pulse 1.2s infinite}
   .thinking #ring{opacity:1;border-color:#7dd3fc;border-top-color:transparent;animation:spin 1s linear infinite}
-  @keyframes pulse{50%{transform:scale(1.04);opacity:.4}}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  svg#avatar{width:100%;height:100%;animation:bob 5s ease-in-out infinite}
+  @keyframes pulse{50%{transform:translateX(-50%) scale(1.04);opacity:.4}}
+  @keyframes spin{from{transform:translateX(-50%) rotate(0)}to{transform:translateX(-50%) rotate(360deg)}}
+  svg#avatar{height:100%;width:auto;max-width:90vw;animation:bob 5s ease-in-out infinite}
   @keyframes bob{50%{transform:translateY(-6px)}}
   .blink{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
   @keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
   #hand{display:none;transform-origin:322px 430px}
   .wave #hand{display:block;animation:wave .7s ease-in-out infinite alternate}
   @keyframes wave{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
-  #caption{width:min(900px,94vw);min-height:92px;background:var(--card);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:14px 20px;font-size:clamp(18px,2.6vw,26px);line-height:1.45;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
+  #caption{flex:0 0 auto;width:min(900px,94vw);min-height:72px;max-height:28vh;overflow-y:auto;background:var(--card);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:14px 20px;font-size:clamp(18px,2.6vw,26px);line-height:1.45;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
   #caption .you{font-size:15px;opacity:.65}
+  #caption #reply[dir=rtl]{font-size:clamp(17px,2.2vw,24px);line-height:1.9}
+  #caption .you:empty{display:none}
   [dir=rtl]{font-family:"Noto Nastaliq Urdu",system-ui,sans-serif;line-height:2}
-  #chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:min(980px,96vw);padding:8px 0}
-  .chip{background:var(--card);border:1px solid rgba(255,255,255,.25);color:var(--ink);padding:14px 20px;border-radius:16px;font-size:clamp(15px,2vw,20px)}
+  #chips{flex:0 0 auto;display:flex;flex-wrap:nowrap;gap:10px;justify-content:safe center;width:min(1100px,96vw);padding:6px 2px 8px;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 18px),transparent)}
+  #chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;white-space:nowrap;background:var(--card);border:1px solid rgba(255,255,255,.25);color:var(--ink);padding:11px 18px;border-radius:14px;font-size:clamp(15px,1.7vw,18px);line-height:1.3;cursor:pointer}
+  .chip:hover{border-color:var(--accent)}
   .chip:active{background:var(--accent);color:#3a2a00}
-  footer{display:flex;gap:10px;align-items:center;justify-content:center;padding:10px 0 16px}
-  #mic{width:74px;height:74px;border-radius:50%;border:none;background:var(--accent);color:#3a2a00;font-size:32px}
-  #txt{flex:1;max-width:520px;padding:16px 18px;border-radius:30px;border:1px solid rgba(255,255,255,.25);background:var(--card);color:var(--ink);font-size:18px;user-select:text}
-  #done{background:transparent;border:2px solid rgba(255,255,255,.4);color:var(--ink);padding:14px 20px;border-radius:30px;font-size:17px}
-  #listenPill{display:none;align-items:center;gap:10px;background:var(--accent);color:#3a2a00;font-weight:700;border-radius:30px;padding:10px 22px;font-size:clamp(16px,2.2vw,22px)}
+  footer{display:flex;gap:12px;align-items:center;justify-content:center;padding:8px 0 14px;width:min(900px,94vw);margin:0 auto;direction:ltr}
+  #mic{flex:0 0 auto;width:72px;height:72px;border-radius:50%;border:none;background:var(--accent);color:#3a2a00;font-size:30px;box-shadow:0 6px 20px rgba(0,0,0,.3);cursor:pointer}
+  body.listening #mic{background:#b3364a;color:#fff;animation:pulse2 1.2s infinite}
+  @keyframes pulse2{50%{box-shadow:0 0 0 12px rgba(179,54,74,.25)}}
+  #txt{flex:1 1 auto;min-width:0;padding:16px 18px;border-radius:30px;border:1px solid rgba(255,255,255,.25);background:var(--card);color:var(--ink);font-size:18px;user-select:text}
+  #done{flex:0 0 auto;white-space:nowrap;background:transparent;border:2px solid rgba(255,255,255,.4);color:var(--ink);padding:14px 20px;border-radius:30px;font-size:17px;cursor:pointer}
+  @media (max-height:640px){#caption{font-size:18px;min-height:56px}.chip{padding:8px 14px}#mic{width:60px;height:60px}}
+  #listenPill{flex:0 0 auto;display:none;align-items:center;gap:10px;background:var(--accent);color:#3a2a00;font-weight:700;border-radius:30px;padding:10px 22px;font-size:clamp(16px,2.2vw,22px)}
   body.listening #listenPill{display:flex}
   #listenPill i{width:10px;height:10px;border-radius:50%;background:#b3364a;animation:fade 1s infinite}
   #idleHint{font-size:clamp(20px,3vw,32px);opacity:.9;text-align:center;animation:fade 2.4s ease-in-out infinite}
@@ -74,11 +82,11 @@
 <div id="app">
   <header>
     <div><h1>MADISON SQUARE MALL</h1><small id="sub">Guest Assistance</small></div>
-    <div class="langs"><button id="l-en" class="on">English</button><button id="l-ur">اردو</button></div>
+    <div class="langs"><button id="l-ur" class="on">اردو</button><button id="l-en">English</button></div>
   </header>
 
   <main id="main">
-    <div id="idleHint">👋 Hi, I'm Madii. Step closer and just talk to me<br><small>میں مدی ہوں۔ قریب آئیں اور مجھ سے بات کریں</small></div>
+    <div id="idleHint" dir="rtl">👋 میں مدی ہوں۔ قریب آئیں اور مجھ سے بات کریں<br><small dir="ltr">Hi, I'm Madii. Step closer and just talk to me</small></div>
     <div id="stage">
       <div id="ring"></div>
       <svg id="avatar" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" aria-label="Madii, virtual receptionist">
@@ -126,7 +134,7 @@
 
   <footer>
     <button id="done">✔ I'm done</button>
-    <input id="txt" type="text" placeholder="Type your question…" autocomplete="off">
+    <input id="txt" type="text" dir="auto" placeholder="Type your question…" autocomplete="off">
     <button id="mic" aria-label="Talk">🎤</button>
   </footer>
 </div>
@@ -175,7 +183,7 @@ const T = {
 
 /* ================== STATE ================== */
 let history = [];
-let lang = 'en', state = 'idle', sessionId = null, busy = false;
+let lang = 'ur', state = 'idle', sessionId = null, busy = false;
 let lastInteraction = 0, lastSeen = 0, cooldownUntil = 0, nearHits = 0;
 let inactTimer = null, fbTimer = null, speakTimer = null, rating = 0, tagsSel = new Set();
 const $ = id => document.getElementById(id);
@@ -194,8 +202,18 @@ function renderLang(){
   $('tags').innerHTML = ''; t.tags.forEach(x => { const b = document.createElement('button'); b.className='tag'; b.textContent=x; b.onclick=()=>{ tagsSel.has(x)?tagsSel.delete(x):tagsSel.add(x); b.classList.toggle('on'); }; $('tags').appendChild(b); });
 }
 function buildStars(){ $('stars').innerHTML=''; for(let i=1;i<=5;i++){ const b=document.createElement('button'); b.textContent='★'; b.onclick=()=>{ rating=i; [...$('stars').children].forEach((s,k)=>s.classList.toggle('on',k<i)); }; $('stars').appendChild(b);} }
-$('l-en').onclick = () => { lang='en'; renderLang(); touch(); };
-$('l-ur').onclick = () => { lang='ur'; renderLang(); touch(); };
+// Switching language takes effect at once: text, Madii's voice and the microphone all change.
+const SWITCH_MSG = { en:"Sure, let's talk in English. How can I help you?", ur:'جی ضرور، اب اردو میں بات کرتے ہیں۔ میں آپ کی کیا مدد کر سکتی ہوں؟' };
+function setLang(l){
+  if(l === lang) return;
+  lang = l; renderLang(); touch();
+  if(state === 'idle' || state === 'feedback') return;
+  stopSpeaking(); stopListening(); misses = 0;
+  if(busy) return;                                   // a question is in flight; the reply will follow in the new language
+  showReply(SWITCH_MSG[lang]); setState('ready'); speak(SWITCH_MSG[lang], afterReply);
+}
+$('l-en').onclick = () => setLang('en');
+$('l-ur').onclick = () => setLang('ur');
 
 function fixName(t){ return String(t||'').replace(/\bSara\b/g,'Madii').replace(/سارہ/g,'مدی'); }
 function showReply(text, you){ text = fixName(text); $('reply').dir = T[lang].dir; $('reply').textContent = text; $('you').textContent = you ? T[lang].you + you : ''; }
@@ -333,7 +351,7 @@ async function finishFeedback(send){
 }
 function resetToIdle(){
   $('thanks').classList.remove('show'); $('fb').classList.remove('show'); $('dir').classList.remove('show'); stopSpeaking(); clearTimeout(inactTimer); clearTimeout(fbTimer);
-  stopListening(); misses = 0; voiceOn = !!SR; sessionId = null; busy = false; cooldownUntil = Date.now() + CFG.COOLDOWN_MS; nearHits = 0; lang = 'en'; renderLang(); setState('idle');
+  stopListening(); misses = 0; voiceOn = !!(SR || window.MediaRecorder); sessionId = null; busy = false; cooldownUntil = Date.now() + CFG.COOLDOWN_MS; nearHits = 0; lang = 'ur'; renderLang(); setState('idle');
 }
 $('fbSend').onclick = () => rating ? finishFeedback(true) : $('stars').animate([{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'none'}],{duration:250});
 $('fbSkip').onclick = () => finishFeedback(false);
@@ -344,7 +362,7 @@ $('txt').addEventListener('focus', () => { if(state==='listening'){ stopListenin
 
 /* ================== VOICE CONVERSATION (hands-free) ================== */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition; let rec = null;
-let voiceOn = !!SR, misses = 0;
+let voiceOn = !!(SR || window.MediaRecorder), misses = 0;
 const LISTEN_TXT = { en:'Listening, speak now', ur:'سن رہی ہوں، بولیں' };
 const TAP_TXT = { en:'🎤 Tap the mic and ask your question', ur:'🎤 مائیک دبائیں اور سوال پوچھیں' };
 const MIC_ERR = {
@@ -360,8 +378,50 @@ function afterReply(){
   setState('ready'); touch();
   if(voiceOn) setTimeout(() => { if(state==='ready' && !busy) listen(); }, 400);
 }
+function blobToB64(b){ return new Promise((res, rej) => { const f = new FileReader(); f.onload = () => res(String(f.result).split(',')[1] || ''); f.onerror = rej; f.readAsDataURL(b); }); }
+function retryOrHint(){ setState('ready'); misses++; if(misses >= 2) $('you').textContent = TAP_TXT[lang]; else if(voiceOn) setTimeout(() => { if(state==='ready' && !busy) listen(); }, 300); }
+// Records the visitor, detects when they stop talking, and sends the clip to n8n (OpenAI) for transcription.
+async function listenServer(){
+  stopSpeaking(); stopListening();
+  if(!window.MediaRecorder){ showReply(MIC_ERR['service-not-allowed'][lang]); setState('ready'); return; }
+  let stream;
+  try{ stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true } }); }
+  catch(e){ console.warn('[Madii] mic:', e); voiceOn = false; showReply(MIC_ERR[e && e.name==='NotFoundError' ? 'audio-capture' : 'not-allowed'][lang]); setState('ready'); return; }
+  const mime = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'].find(m => MediaRecorder.isTypeSupported(m)) || '';
+  const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+  const chunks = []; mr.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  const AC = window.AudioContext || window.webkitAudioContext; const ac = new AC();
+  const an = ac.createAnalyser(); an.fftSize = 1024; ac.createMediaStreamSource(stream).connect(an); const buf = new Uint8Array(an.fftSize);
+  const t0 = Date.now(); let heard = false, loudMs = 0, lastLoud = t0, floor = 0.008, cancelled = false;
+  const handle = { abort(){ cancelled = true; if(mr.state !== 'inactive') mr.stop(); }, finish(){ if(mr.state !== 'inactive') mr.stop(); } };
+  rec = handle;
+  const iv = setInterval(() => {
+    an.getByteTimeDomainData(buf); let sum = 0; for(const v of buf){ const x = (v - 128) / 128; sum += x * x; }
+    const rms = Math.sqrt(sum / buf.length), now = Date.now();
+    if(now - t0 < 350){ floor = Math.max(floor, rms); return; }          // learn the room noise first
+    if(rms > Math.max(0.025, floor * 2.2)){ loudMs += 80; lastLoud = now; if(loudMs >= 240) heard = true; }
+    if(heard && now - lastLoud > 1300) handle.finish();                    // visitor stopped talking
+    else if(!heard && now - t0 > 7000) handle.finish();                    // nobody spoke
+    else if(now - t0 > 15000) handle.finish();                             // hard limit
+  }, 80);
+  mr.onstop = async () => {
+    clearInterval(iv); stream.getTracks().forEach(t => t.stop()); try{ ac.close(); }catch(e){}
+    if(rec === handle) rec = null;
+    if(cancelled || state !== 'listening') return;
+    if(!heard){ retryOrHint(); return; }
+    setState('thinking'); $('you').textContent = T[lang].you + '…';
+    try{
+      const blob = new Blob(chunks, { type: (mr.mimeType || mime || 'audio/webm').split(';')[0] });
+      const d = await call('stt', { audio: await blobToB64(blob), mimeType: blob.type });
+      const t = String(d.text || '').trim();
+      if(t && !/^(thank you|thanks for watching|\.+)$/i.test(t)){ misses = 0; ask(t); } else retryOrHint();
+    }catch(e){ console.warn('[Madii] stt failed', e); setState('ready'); showReply(MIC_ERR.network[lang]); }
+  };
+  $('listenTxt').textContent = LISTEN_TXT[lang]; $('you').textContent = '';
+  setState('listening'); touch(); mr.start(250);
+}
 function listen(){
-  if(!SR) return;
+  if(lang === 'ur' || !SR) return listenServer();      // Urdu: OpenAI transcription works on every device
   stopSpeaking(); stopListening();
   const r = new SR(); rec = r; let errCode = '';
   r.lang = T[lang].rec; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
@@ -389,14 +449,13 @@ function listen(){
   try{ r.start(); }catch(e){ rec = null; setState('ready'); }
 }
 $('mic').onclick = () => {
-  if(!SR){ showReply(lang==='ur' ? 'اس ڈیوائس پر آواز سے سوال ممکن نہیں، براہ کرم لکھیں۔' : 'Voice input is not supported on this browser. Please type or tap a button.'); return; }
+  if(!SR && !window.MediaRecorder){ showReply(lang==='ur' ? 'اس ڈیوائس پر آواز سے سوال ممکن نہیں، براہ کرم لکھیں۔' : 'Voice input is not supported on this browser. Please type or tap a button.'); return; }
   touch();
   if(state==='listening'){ voiceOn = false; stopListening(); setState('ready'); return; }   // tap again = pause voice
   voiceOn = true; misses = 0;
   if(state==='idle'){ startSession(); return; }
   listen();                                              // also interrupts Madii mid-sentence
 };
-['l-en','l-ur'].forEach(id => $(id).addEventListener('click', () => { if(state==='listening') listen(); }));
 
 /* ================== PRESENCE SENSING ================== */
 const cam = $('cam'); const cv = document.createElement('canvas'); cv.width = 48; cv.height = 36; const cx = cv.getContext('2d', {willReadFrequently:true});
@@ -445,7 +504,7 @@ $('startBtn').onclick = async () => {
   try{ const a = await navigator.mediaDevices.getUserMedia({ audio:true }); a.getTracks().forEach(t => t.stop()); }catch(e){ voiceOn = false; console.warn('[Madii] mic permission:', e); }
   const ok = await initCamera();
   $('start').classList.remove('show'); renderLang(); setState('idle');
-  if(!ok) $('idleHint').innerHTML = '👆 Hi, I\'m Madii. Tap anywhere to talk to me<br><small>میں مدی ہوں۔ بات کرنے کے لیے اسکرین کو چھوئیں</small>';
+  if(!ok) $('idleHint').innerHTML = '👆 میں مدی ہوں۔ بات کرنے کے لیے اسکرین کو چھوئیں<br><small dir="ltr">Hi, I\'m Madii. Tap anywhere to talk to me</small>';
 };
 document.addEventListener('visibilitychange', async () => { if(!document.hidden && 'wakeLock' in navigator){ try{ await navigator.wakeLock.request('screen'); }catch(e){} } });
 renderLang();
